@@ -18,9 +18,8 @@ public class DepartmentController {
     @Autowired
     DepartmentService departmentService;
     @GetMapping("department")
-    public Page<DepartmentDTO> getAll(@RequestParam(value = "pageNumber",defaultValue = "0",required = false) Integer pageNumber,
-                                      @RequestParam(value = "pageSize",defaultValue = "3",required = false) Integer pageSize) {
-        return departmentService.getAll(pageNumber,pageSize);
+    public List<DepartmentDTO> getAll() {
+        return departmentService.getAll();
     }
     @GetMapping("department/{id}")
     public Department getById(@PathVariable Integer id) {
@@ -29,7 +28,7 @@ public class DepartmentController {
     @GetMapping("department/search")
     public List<DepartmentDTO> filterByName(@RequestParam String name,
                                             @RequestParam(defaultValue = "0",required = false) Integer pageNumber,
-                                            @RequestParam(value = "pageSize",defaultValue = "5",required = false) Integer pageSize)
+                                            @RequestParam(value = "pageSize",defaultValue = "10",required = false) Integer pageSize)
     {
         return departmentService.filterByName(name,pageNumber,pageSize);
     }
@@ -47,17 +46,17 @@ public class DepartmentController {
          return department;
     }
     @DeleteMapping("department/{id}")
-    public String deleteById(@PathVariable Integer id ) {
-        Department department = departmentService.getById(id);
-        if(department == null) {
-            return "Not found!!!";
-        }
-        else{
-            departmentService.deleteById(id);
-        }
-        return "Delete successful!!";
+    public List<DepartmentDTO> deleteById(@PathVariable Integer id,
+                                          @RequestParam String name,
+                                          @RequestParam(defaultValue = "0",required = false) Integer pageNumber,
+                                          @RequestParam(value = "pageSize",defaultValue = "5",required = false) Integer pageSize ) {
+
+        departmentService.deleteById(id);
+        return departmentService.filterByName("",pageNumber,pageSize);
 
     }
-
-
+    @GetMapping("/department/test")
+    public List<Department> findByManyField(@RequestParam(required = false) String query1 , @RequestParam(required = false) String query2) {
+        return departmentService.filterByManyField(query1,query2);
+    }
 }

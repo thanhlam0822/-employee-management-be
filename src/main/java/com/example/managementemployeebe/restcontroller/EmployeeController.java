@@ -11,6 +11,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api")
+@CrossOrigin("*")
 public class EmployeeController {
     @Autowired
     EmployeeService employeeService;
@@ -24,8 +25,10 @@ public class EmployeeController {
     public Employee getById(@PathVariable Integer id) {
         return employeeService.getById(id);
     }
-    @PostMapping("employee")
-    public Employee add(@RequestBody Employee employee) {
+    @PostMapping("department/{departmentId}/employee")
+    public Employee add(@PathVariable int departmentId,@RequestBody Employee employee) {
+        Department department = departmentService.getById(departmentId);
+        employee.setDepartment(department);
         employeeService.add(employee);
         return employee;
     }

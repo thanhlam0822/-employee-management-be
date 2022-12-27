@@ -9,8 +9,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -22,14 +28,13 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Autowired
     DepartmentRepository departmentRepository;
     @Override
-    public Page<DepartmentDTO> getAll(Integer pageNo, Integer pageSize) {
-        Pageable pageable = PageRequest.of(pageNo,pageSize);
-        Page<Department> departmentsPage = departmentRepository.findAll(pageable);
-        List<Department> departmentList = departmentsPage.getContent();
+    public List<DepartmentDTO> getAll() {
+
+        List<Department> departmentList = departmentRepository.findAll();
         List<DepartmentDTO> departmentDTOS = departmentList.stream().map((department) -> modelMapper.map(department,DepartmentDTO.class))
                 .collect(Collectors.toList());
-        Page<DepartmentDTO> departmentDTOPage = new PageImpl<>(departmentDTOS);
-        return departmentDTOPage;
+
+        return departmentDTOS;
 
     }
 
@@ -61,6 +66,26 @@ public class DepartmentServiceImpl implements DepartmentService {
                 .collect(Collectors.toList());
 
         return departmentDTOS;
+    }
+
+    @Override
+    public List<Department> filterByManyField(String query1, String query2) {
+        return departmentRepository.findAll(new Specification<Department>() {
+            @Override
+            public Predicate toPredicate(Root<Department> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder)
+            {
+                List<Predicate>predicates = new ArrayList<>();
+                if(query1 != null  ) {
+                    predicates.add(criteriaBuilder.and(criteriaBuilder.like(root.get("name"), "%" + query1 + "%")));
+                }
+                if(query2!=null){
+                    predicates.add(criteriaBuilder.and(criteriaBuilder.like(root.get("responsibility"), "%" + query2 + "%")));
+                }
+                return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
+            }
+        });
+
+
     }
 
 

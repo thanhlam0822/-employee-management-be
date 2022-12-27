@@ -30,6 +30,8 @@ public class Employee  {
     @Column
     private String role;
     @Column
+    private String status;
+    @Column
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     private Date birthDay;
     @ManyToOne
